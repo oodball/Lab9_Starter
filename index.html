@@ -88,6 +88,13 @@
   </main>
 
   <script>
+    class DivideByZeroError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "DivideByZeroError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -162,8 +169,35 @@
           }
         });
       });
+      
+      window.onerror = function (message, source, lineno, colno, error) {
+        console.error(`Global error caught: ${message} at ${source}:${lineno}:${colno}`);
+        // Add fetch here to send the error to a server
 
+        fetch('https://your-server.com/error-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: message,
+            source: source,
+            lineno: lineno,
+            colno: colno,
+            error: error.toString()
+          })
+        }).catch(err => console.error('Failed to send error report:', err));
+
+        return true;
+      };
   </script>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "2e26233c53e243c5acfb7ae5b8240902"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>         
 </body>
 
 </html>
